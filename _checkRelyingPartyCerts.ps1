@@ -4,7 +4,7 @@
 # Email components
 $strFromAddress = "sender@something.gTLD"
 $strToAddress = "recipient@something.gTLD"
-$strMessageSubject = "ADFS Relaying Party Certificates Pending Expiry"
+$strMessageSubject = "ADFS Relying Party Certificates Pending Expiry"
 $strSendingServer = "mail.relay.gTLD"
 
 $iAlertHoursBeforeExpiry = 30 * 24
@@ -14,25 +14,30 @@ $iExpiringSoon = 0
 
 Get-AdfsRelyingPartyTrust | ForEach-Object {
 #	write-host $_.Identifier
-	$strRPIdentity = $_.Identifier
-	$certRelayingPartySigning = (Get-AdfsRelyingPartyTrust -Identifier $strRPIdentity).RequestSigningCertificate
+	$boolTrustEnabled = $_.Enabled
 	
-	$certRelayingPartySigning | ForEach-Object {
-		$dateExpiryDate = $_.NotAfter
-		$strThumbprint = $_.Thumbprint
-		$strSubject = $_.Subject
+	if($boolTrustEnabled -eq $true){
 
-		if($dateExpiryDate){
-			$dtdiff = New-TimeSpan $(Get-Date) $dateExpiryDate
-#			write-host $dtdiff.TotalHours
-			if ($dtdiff.TotalHours -lt $iAlertHoursBeforeExpiry){
-				$iExpiringSoon = $iExpiringSoon + 1
-				$strTableBody = "$strTableBody <tr><td>$strSubject</td><td>$dateExpiryDate</td></tr>"
-				write-host "$dateExpiryDate is when $strSubject expires"
-				write-host $dtdiff.TotalHours
-				write-host "."
+		$strRPIdentity = $_.Identifier
+		$certRelyingPartySigning = (Get-AdfsRelyingPartyTrust -Identifier $strRPIdentity).RequestSigningCertificate
+
+		$certRelyingPartySigning | ForEach-Object {
+			$dateExpiryDate = $_.NotAfter
+			$strThumbprint = $_.Thumbprint
+			$strSubject = $_.Subject
+
+			if($dateExpiryDate){
+				$dtdiff = New-TimeSpan $(Get-Date) $dateExpiryDate
+	#			write-host $dtdiff.TotalHours
+				if ($dtdiff.TotalHours -lt $iAlertHoursBeforeExpiry){
+					$iExpiringSoon = $iExpiringSoon + 1
+					$strTableBody = "$strTableBody <tr><td>$strSubject</td><td>$dateExpiryDate</td></tr>"
+					write-host "$dateExpiryDate is when $strSubject expires"
+					write-host $dtdiff.TotalHours
+					write-host "."
+				}
 			}
-		}		
+		}
 	}
 }
 
