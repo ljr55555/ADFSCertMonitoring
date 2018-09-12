@@ -23,7 +23,7 @@ my $strSenderEmailAddress = 'someone@whatever.gTLD';
 my $strAlertSubject = "Certificate Expiration Notification";
 
 # Enable/disable debugging output
-my $boolDebug = 1;
+my $boolDebug = 0;
 ################################################################################
 ##      DO NOT EDIT BELOW THIS LINE UNLESS YOU REALLY MEAN IT
 ################################################################################
